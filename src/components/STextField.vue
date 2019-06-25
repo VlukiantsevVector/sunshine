@@ -125,7 +125,7 @@ export default Vue.extend({
 
   computed: {
     isEmpty() {
-      return !this.internalValue && !this.placeholder;
+      return !Number.isInteger(this.value) && !this.internalValue && !this.placeholder;
     },
 
     type() {
