@@ -45,7 +45,7 @@ export default Vue.extend({
     },
 
     value: {
-      type: [String, Number],
+      type: String,
       default: undefined,
     },
 
@@ -62,7 +62,7 @@ export default Vue.extend({
 
   data() {
     return {
-       internalValue: Number.isInteger(this.value) ? this.value : this.value  || '',
+        internalValue: this.value || '',
     };
   },
 

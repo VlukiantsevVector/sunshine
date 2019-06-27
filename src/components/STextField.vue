@@ -11,6 +11,7 @@
     class="s-text-field"
   >
     <s-format-input
+	  v-if="type!=='number'"
       v-model="internalValue"
       :format="hasFocus ? format : ''"
       :maxlength="computedMaxLength"
@@ -24,6 +25,19 @@
       @blur="onBlur"
       v-bind="$attrs"
     />
+	<input 
+	  v-else
+	  v-model="internalValue"
+	  :type="type"
+      :disabled="inactive"
+      :readonly="readonly"
+      :placeholder="placeholder"	  
+	  :class="{ 's-input__input': true, 's-input__input--with-label': !!label }"
+	  @keypress="onKeyPress"
+      @focus="onFocus"
+      @blur="onBlur"
+      v-bind="$attrs"	  
+	/>	
   </s-base-input>
 </template>
 
