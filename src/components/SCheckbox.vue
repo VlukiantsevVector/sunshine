@@ -33,6 +33,12 @@ export default Vue.extend({
     SCheckable,
   },
 
+  $_veeValidate: {
+    value() {
+      return this.checked;
+    },
+  },
+
   model: {
     prop: 'checked',
     event: 'change',
@@ -65,6 +71,7 @@ export default Vue.extend({
     isChecked(val) {
       if (val !== this.checked) {
         this.$emit('change', val);
+        this.$emit('input', val);
       }
     },
   },
