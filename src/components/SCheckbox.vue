@@ -33,11 +33,7 @@ export default Vue.extend({
     SCheckable,
   },
 
-  $_veeValidate: {
-    value() {
-      return this.checked;
-    },
-  },
+  inject: ['$validator'],
 
   model: {
     prop: 'checked',
@@ -71,6 +67,7 @@ export default Vue.extend({
     isChecked(val) {
       if (val !== this.checked) {
         this.$emit('change', val);
+        //input event is necessary to emit for vee validate to capture change for checkbox and fire isDirty status
         this.$emit('input', val);
       }
     },
