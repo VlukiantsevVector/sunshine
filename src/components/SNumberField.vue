@@ -6,24 +6,22 @@
     :readonly="readonly"
     :error="error"
     :label="label"
-    :max-length="maxLength"
     :current-length="currentLength"
-    class="s-text-field"
+    class="s-number-field"
   >
-    <s-format-input
-      v-model="internalValue"
+    <input
+      v-model.number="internalValue"
       :format="hasFocus ? format : ''"
-      :maxlength="computedMaxLength"
-      :type="type"
+      :type="'number'"
       :disabled="inactive"
       :readonly="readonly"
       :placeholder="placeholder"
-      :input-class="{ 's-input__input': true, 's-input__input--with-label': !!label }"
-      @keypress="onKeyPress"
+      :class="{ 's-input__input': true, 's-input__input--with-label': !!label }"
       @focus="onFocus"
       @blur="onBlur"
+      @keypress="onKeyPress"
       v-bind="$attrs"
-    />
+    >
   </s-base-input>
 </template>
 
@@ -33,7 +31,7 @@ import SBaseInput from './SBaseInput.vue';
 import SFormatInput from './internal/SFormatInput.vue';
 
 export default Vue.extend({
-  name: 'STextField',
+  name: 'SNumberField',
 
   inheritAttrs: false,
 
@@ -45,7 +43,6 @@ export default Vue.extend({
 
   components: {
     SBaseInput,
-    SFormatInput,
   },
 
   props: {
@@ -53,31 +50,13 @@ export default Vue.extend({
       type: String,
       default: '',
     },
-
     error: {
       type: String,
       default: undefined,
     },
-
     value: {
-      type: [String, Number],
-      default: '',
-    },
-    number: {
-      type: Boolean,
-      default: false,
-    },
-    phone: {
-      type: Boolean,
-      default: false,
-    },
-    password: {
-      type: Boolean,
-      default: false,
-    },
-    email: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     format: {
       type: String,
@@ -87,19 +66,17 @@ export default Vue.extend({
       type: Boolean,
       default: false,
     },
-
     readonly: {
       type: Boolean,
       default: false,
     },
-
     placeholder: {
       type: String,
       default: undefined,
     },
-    maxLength: {
-      type: Number,
-      default: 0,
+    allowFloat: {
+      type: Boolean,
+      default: false,
     },
   },
 
@@ -118,43 +95,19 @@ export default Vue.extend({
 
     internalValue(val) {
       if (val !== this.value) {
-        this.$emit('input', val);
+        this.$emit('input', val === '' ? 0 : val);
       }
     },
   },
 
   computed: {
     isEmpty() {
-      return !this.internalValue && !this.placeholder;
-    },
-
-    type() {
-      switch (true) {
-        case this.number:
-          return 'number';
-        case this.phone:
-          return 'tel';
-        case this.password:
-          return 'password';
-        case this.email:
-          return 'email';
-        default:
-          return 'text';
-      }
+      return !Number.isInteger(this.value) && !this.internalValue && !this.placeholder;
     },
 
     currentLength() {
       let val = this.internalValue;
       return val instanceof String ? val.length : val.toString().length;
-    },
-
-    computedMaxLength() {
-      if (this.maxLength) {
-        return this.maxLength;
-      } else if (this.format) {
-        return String(this.format.length);
-      }
-      return undefined;
     },
   },
 
@@ -176,17 +129,14 @@ export default Vue.extend({
     },
 
     isValidKey(keyCode) {
-      if (this.phone) {
+      if (this.allowFloat) {
         return (
           keyCode === 43 ||
           keyCode === 45 ||
+          keyCode === 46 ||
           (keyCode >= 48 && keyCode <= 57)
         );
-      } else if (this.format) {
-        return keyCode !== 32; // forbid space in formatted input
-      } else {
-        return true;
-      }
+      } else return keyCode >= 48 && keyCode <= 57;
     },
   },
 });
