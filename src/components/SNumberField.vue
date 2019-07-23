@@ -1,39 +1,17 @@
 <template>
-  <s-base-input
-    :inactive="inactive"
-    :has-focus="hasFocus"
-    :is-empty="isEmpty"
-    :readonly="readonly"
-    :error="error"
+  <s-text-field
+    v-model="internalValue"
+    :custom-is-valid-key="(keyCode)=>isValidKeyNumber(keyCode)"
     :label="label"
-    :current-length="currentLength"
-    class="s-number-field"
-  >
-    <input
-      v-model.number="internalValue"
-      :format="hasFocus ? format : ''"
-      :type="'number'"
-      :disabled="inactive"
-      :readonly="readonly"
-      :placeholder="placeholder"
-      :class="{ 's-input__input': true, 's-input__input--with-label': !!label }"
-      @focus="onFocus"
-      @blur="onBlur"
-      @keypress="onKeyPress"
-      v-bind="$attrs"
-    >
-  </s-base-input>
+  />
 </template>
 
 <script>
 import Vue from 'vue';
-import SBaseInput from './SBaseInput.vue';
-import SFormatInput from './internal/SFormatInput.vue';
+import STextField from './STextField.vue';
 
 export default Vue.extend({
   name: 'SNumberField',
-
-  inheritAttrs: false,
 
   $_veeValidate: {
     value() {
@@ -42,7 +20,7 @@ export default Vue.extend({
   },
 
   components: {
-    SBaseInput,
+    STextField,
   },
 
   props: {
@@ -50,51 +28,29 @@ export default Vue.extend({
       type: String,
       default: '',
     },
-    error: {
-      type: String,
-      default: undefined,
+    allowFloat: {
+      type: Boolean,
+      default: false,
     },
     value: {
       type: Number,
       default: 0,
     },
-    format: {
-      type: String,
-      default: null,
-    },
-    inactive: {
-      type: Boolean,
-      default: false,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    placeholder: {
-      type: String,
-      default: undefined,
-    },
-    allowFloat: {
-      type: Boolean,
-      default: false,
-    },
   },
 
   data() {
     return {
-      internalValue: this.value,
-      hasFocus: false,
-      formattedValue: this.value,
+      internalValue: this.value.toString(),
     };
   },
 
   watch: {
     value(val) {
-      this.internalValue = val;
+      this.internalValue = val.toString();
     },
 
     internalValue(val) {
-      if (val !== this.value) {
+      if (parseInt(val, 10) !== this.value) {
         this.$emit('input', val === '' ? 0 : val);
       }
     },
@@ -104,39 +60,21 @@ export default Vue.extend({
     isEmpty() {
       return !Number.isInteger(this.value) && !this.internalValue && !this.placeholder;
     },
-
-    currentLength() {
-      let val = this.internalValue;
-      return val instanceof String ? val.length : val.toString().length;
-    },
   },
 
   methods: {
-    onBlur() {
-      this.hasFocus = false;
-      this.$emit('blur');
-    },
-
-    onFocus() {
-      this.hasFocus = true;
-      this.$emit('focus');
-    },
-
-    onKeyPress(event) {
-      if (!this.isValidKey(event.keyCode)) {
-        event.preventDefault();
-      }
-    },
-
-    isValidKey(keyCode) {
+    isValidKeyNumber(keyCode) {
       if (this.allowFloat) {
+        // to get decimal separator we need to formatToParts number with fraction
+        // and get [1] element, which states for decimal separator part
+        let keyCodeDecimalSeparator = Intl.NumberFormat(this.$root.$i18n.locale)
+          .formatToParts(1.1)[1].value.charCodeAt(0);
         return (
-          keyCode === 43 ||
-          keyCode === 45 ||
-          keyCode === 46 ||
-          (keyCode >= 48 && keyCode <= 57)
+          keyCode === 45 || //-
+          keyCode === keyCodeDecimalSeparator ||
+          (keyCode >= 48 && keyCode <= 57) // numbers
         );
-      } else return keyCode >= 48 && keyCode <= 57;
+      } else return (keyCode >= 48 && keyCode <= 57) || keyCode === 43;
     },
   },
 });

@@ -101,6 +101,10 @@ export default Vue.extend({
       type: Number,
       default: 0,
     },
+    customIsValidKey: {
+      type: Function,
+      default: undefined,
+    },
   },
 
   data() {
@@ -156,6 +160,11 @@ export default Vue.extend({
       }
       return undefined;
     },
+
+    computedIsValidKey() {
+      if (typeof this.customIsValidKey === 'function') return this.customIsValidKey.bind(this);
+      return ((keyCode) => this.isValidKeyString(keyCode));
+    },
   },
 
   methods: {
@@ -170,17 +179,17 @@ export default Vue.extend({
     },
 
     onKeyPress(event) {
-      if (!this.isValidKey(event.keyCode)) {
+      if (!this.computedIsValidKey(event.keyCode)) {
         event.preventDefault();
       }
     },
 
-    isValidKey(keyCode) {
+    isValidKeyString(keyCode) {
       if (this.phone) {
         return (
-          keyCode === 43 ||
-          keyCode === 45 ||
-          (keyCode >= 48 && keyCode <= 57)
+          keyCode === 43 || //+
+          keyCode === 45 || //-
+          (keyCode >= 48 && keyCode <= 57) // numbers
         );
       } else if (this.format) {
         return keyCode !== 32; // forbid space in formatted input
