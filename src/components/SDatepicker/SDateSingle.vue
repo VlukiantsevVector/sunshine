@@ -64,8 +64,13 @@ export default Vue.extend({
   },
 
   watch: {
-    value(newVal) {
-      this.internalValue = newVal;
+    value: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal.isValid) {
+          this.internalDate = newVal;
+        }
+      },
     },
 
     internalValue(val: IDatepickerValue) {
@@ -84,7 +89,7 @@ export default Vue.extend({
 
     isOpen(newVal) {
       if (!newVal) {
-        this.$emit('input', this.internalValue);
+        this.$emit('input', this.internalDate);
       }
     },
   },
